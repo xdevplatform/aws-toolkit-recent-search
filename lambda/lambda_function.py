@@ -1,21 +1,25 @@
 import sys
+import json
 import pymysql
 import requests
 
 def lambda_handler(event, context):
-    
-    query = event["query"] 
-    max_results = event["max_results"] 
-    start_time = event["start_time"] 
-    end_time = event["end_time"]  
+    print("Parsing event json...")
+    body = json.loads(event["body"])
+    print("Received body:")
+    print(body)
+    query = body["query"] 
+    max_results = body["max_results"] 
+    start_time = body["start_time"] 
+    end_time = body["end_time"]  
 
-    ENDPOINT = event["endpoint"] 
-    USER = event["user"] 
-    REGION = event["region"] 
-    DBNAME = event["dbname"] 
-    PASSWORD = event["password"] 
+    ENDPOINT = body["endpoint"] 
+    USER = body["user"] 
+    REGION = body["region"] 
+    DBNAME = body["dbname"] 
+    PASSWORD = body["password"] 
 
-    BEARER_TOKEN = event["bearer_token"] 
+    BEARER_TOKEN = body["bearer_token"] 
 
     def get_oauth2_bearer_token(r):
         
@@ -26,7 +30,8 @@ def lambda_handler(event, context):
         url = "https://api.twitter.com/2/tweets/search/recent?tweet.fields=id,text,attachments,author_id,context_annotations,conversation_id,created_at,entities,geo,in_reply_to_user_id,lang,possibly_sensitive,public_metrics,referenced_tweets,reply_settings,source,withheld&expansions=author_id,referenced_tweets.id,in_reply_to_user_id,attachments.media_keys,attachments.poll_ids,geo.place_id,entities.mentions.username,referenced_tweets.id.author_id&media.fields=media_key,type,duration_ms,height,preview_image_url,url,public_metrics,width,alt_text&place.fields=contained_within,country,country_code,full_name,geo,id,name,place_type&poll.fields=duration_minutes,end_datetime,id,options,voting_status&user.fields=created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,public_metrics,url,username,verified,withheld"
         auth = get_oauth2_bearer_token
         headers = {"Content-Type": "application/json"}
-
+        print(f"Running request for url: {url}")
+        print(f"With query params: {query_params}")
         return requests.request(
                 "GET",
                 url = url,
@@ -49,6 +54,7 @@ def lambda_handler(event, context):
         while True:
             response = recent_search(query_parameters)
             if response.status_code != 200:
+                print(response)
                 raise Exception(response.status_code, response.text)
             request_count += 1
             print("Request count:", request_count)
