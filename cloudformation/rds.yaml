@@ -32,7 +32,7 @@ Parameters:
   DatabaseInstanceIdentifier:
     AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
     ConstraintDescription: Must begin with letter and contain only alphanumeric charaters
-    Default: mysqldb
+    Default: mysqldbtweets
     Description: Instance identifier name
     MaxLength: 60
     MinLength: 1
@@ -60,7 +60,7 @@ Parameters:
   DatabasePassword:
     AllowedPattern: '[a-zA-Z0-9]*'
     ConstraintDescription: Must contain only alphanumerical characters
-    Default: Examplepsswd
+    Default: Test1230
     Description: Password for MySQL database access
     MaxLength: 41
     MinLength: 8
