@@ -17,10 +17,9 @@
 
 3. Navigate to your local command line. From the main `aws-toolkit-recent-search` directory, run the following script to create tables in the database: `$ python3 create_tables.py`
 
-**[Review/ work on the following steps]**
-
 4. Upload ETL code to Lambda:
     * Download `lambda/script.zip` locally from GitHub repo
+        * Note to self, not to include in tutorial: follow the guidlines here for creating the zip file: https://www.danielherediamejias.com/python-scripts-aws-lambda/  
     * Log in to your AWS account and Search for Lambda in the "Search for services" search box.
     * Navigate to AWS Lambda and select "Create function".
     * Select "Author from scratch".
@@ -29,8 +28,9 @@
     * Click on "Create Function".
     * Select "Upload from" > ".zip file" and upload the `script.zip` file previously downloaded.
     * Click "Save".
-    * Under "Configuration", edit the Timeout to 15 minutes.
-    * Good example/ guidance in this tutorial: https://www.danielherediamejias.com/python-scripts-aws-lambda/
+    * Under "Configuration" > "General configuration": edit the Timeout to 15 minutes.
+
+**[The above works / has been tested. Review/ work on the following steps]**
 
 5. Create a function URL (this will later be used to trigger the lambda function and fetch Tweets):
     * Under "Configuration", select "Function URL".
