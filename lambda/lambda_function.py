@@ -15,7 +15,6 @@ def lambda_handler(event, context):
 
     ENDPOINT = body["endpoint"] 
     USER = body["user"] 
-    REGION = body["region"] 
     DBNAME = body["dbname"] 
     PASSWORD = body["password"] 
 
