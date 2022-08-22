@@ -32,7 +32,25 @@
 
 **[The above works / has been tested. Review/ work on the following steps]**
 
-5. Create a function URL (this will later be used to trigger the lambda function and fetch Tweets):
+5. Test the Lambda function in the AWS Console: 
+    * Use the following test event (make sure to replace XXX with your own credentials and to update the start and end times to be within the last 7 days): 
+    {
+        "query": "((ipad OR iphone) apple -is:retweet)",
+        "max_results": 100,
+        "start_time": "2022-08-21T13:00:00Z",
+        "end_time": "2022-08-21T13:30:00Z",
+        "bearer_token": "XXX",
+        "endpoint": "XXX",
+        "user": "dbadmin",
+        "dbname": "searchtweetsdb",
+        "password": "Test1230"
+    }
+    *  In the Lambda handler: comment out lines 11-22 and uncomment lines 24-33 (as per comment in the script).
+    * You can now test the Lambda function in the AWS console. When you test the function, new data will be added to your DB instance.
+
+**[The above works / has been tested. Review/ work on the following steps]**
+
+6. Create a function URL (this will later be used to trigger the lambda function and fetch Tweets):
     * Under "Configuration", select "Function URL".
     * Auth type, select "AWS_IAM".
     * Copy the function URL you just created for later. This will have the following format: `https://<url-id>.lambda-url.<region>.on.aws`.

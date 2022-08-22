@@ -4,10 +4,12 @@ import pymysql
 import requests
 
 def lambda_handler(event, context):
-    print("Parsing event json...")
+    print(event)
+
+    # Comment out lines 11-22 and uncomment lines 24-33 below to test Lambda function in AWS console.
+
     body = json.loads(event["body"])
-    print("Received body:")
-    print(body)
+
     query = body["query"] 
     max_results = body["max_results"] 
     start_time = body["start_time"] 
@@ -17,8 +19,18 @@ def lambda_handler(event, context):
     USER = body["user"] 
     DBNAME = body["dbname"] 
     PASSWORD = body["password"] 
-
     BEARER_TOKEN = body["bearer_token"] 
+    
+    # query = event["query"] 
+    # max_results = event["max_results"] 
+    # start_time = event["start_time"] 
+    # end_time = event["end_time"]  
+
+    # ENDPOINT = event["endpoint"] 
+    # USER = event["user"] 
+    # DBNAME = event["dbname"] 
+    # PASSWORD = event["password"] 
+    # BEARER_TOKEN = event["bearer_token"] 
 
     def get_oauth2_bearer_token(r):
         
