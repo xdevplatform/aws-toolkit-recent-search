@@ -30,8 +30,6 @@
     * Click "Save".
     * Under "Configuration" > "General configuration": edit the Timeout to 15 minutes.
 
-**[The above works / has been tested. Review/ work on the following steps]**
-
 5. Test the Lambda function in the AWS Console: 
     * Use the following test event (make sure to replace XXX with your own credentials and to update the start and end times to be within the last 7 days): 
     {
