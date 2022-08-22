@@ -32,6 +32,7 @@
 
 5. Test the Lambda function in the AWS Console: 
     * Use the following test event (make sure to replace XXX with your own credentials and to update the start and end times to be within the last 7 days): 
+    ```
     {
         "query": "((ipad OR iphone) apple -is:retweet)",
         "max_results": 100,
@@ -43,6 +44,7 @@
         "dbname": "searchtweetsdb",
         "password": "Test1230"
     }
+    ```
     *  In the Lambda handler: comment out lines 11-22 and uncomment lines 24-33 (as per comment in the script).
     * You can now test the Lambda function in the AWS console. When you test the function, new data will be added to your DB instance.
 
