@@ -75,7 +75,7 @@ curl -X POST \
     "password": "Test1230"
 }'
 ```
-7. Run curl command.
+8. Run curl command.
 
 ## Notes
 This toolkit in intended as an example framework that quickly fetches, parses, and analyzes Twitter data.
