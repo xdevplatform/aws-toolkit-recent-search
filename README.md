@@ -1,7 +1,9 @@
 # aws-toolkit-recent-search
 
 ## Set up
- 
+
+Start by cloning this repository.
+
 1. Run CloudFormation script to create RDS database with MySQL engine.
     * Login to your AWS account and navigate to AWS CloudFormation.
     * Select "Create stack".
