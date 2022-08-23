@@ -29,7 +29,7 @@
     * Click "Save".
     * Under "Configuration" > "General configuration": edit the Timeout to 15 minutes.
 
-5. Test the Lambda function in the AWS Console: 
+5. [Optional step] Test the Lambda function in the AWS Console: 
     * Use the following test event (make sure to replace XXX with your own credentials and to update the start and end times to be within the last 7 days): 
     ```
     {
@@ -44,7 +44,7 @@
         "password": "Test1230"
     }
     ```
-    *  In the Lambda handler: comment out lines 11-22 and uncomment lines 24-33 (as per comment in the script).
+    *  In the Lambda handler: comment out lines 11-22 and uncomment lines 24-33 (as per comment in the script) and deploy. (Make sure to revert this back and redeploy to previous state when you're done testing.)
     * You can now test the Lambda function in the AWS console. When you test the function, new data will be added to your DB instance.
 
 **[The above works / has been tested. Review/ work on the following steps]**
