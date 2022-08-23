@@ -19,7 +19,6 @@
 
 4. Upload ETL code to Lambda:
     * Download `lambda/script.zip` locally from GitHub repo
-        * Note to self, not to include in tutorial: follow the guidlines here for creating the zip file: https://www.danielherediamejias.com/python-scripts-aws-lambda/  
     * Log in to your AWS account and Search for Lambda in the "Search for services" search box.
     * Navigate to AWS Lambda and select "Create function".
     * Select "Author from scratch".
@@ -51,20 +50,32 @@
 **[The above works / has been tested. Review/ work on the following steps]**
 
 6. Create a function URL (this will later be used to trigger the lambda function and fetch Tweets):
-    * Under "Configuration", select "Function URL".
-    * Auth type, select "AWS_IAM".
+    * From the Lambda function page: under "Configuration", select "Function URL".
+    * Auth type, select "NONE".
     * Copy the function URL you just created for later. This will have the following format: `https://<url-id>.lambda-url.<region>.on.aws`.
-7. Change start and end times in `event_data.json`.
-8. Change query in `event_data.json` ([documentatio](https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query) for how to build a query).
-9. Build curl command (incorporate `event_data.json`)
-10. Run  curl command. **[IN PROGRESS]**
-    * Create [function URL](https://docs.aws.amazon.com/lambda/latest/dg/lambda-urls.html).
-    * Attempted following steps
-        * Create execution role, as described [here](https://docs.aws.amazon.com/lambda/latest/dg/urls-tutorial.html).
-        * Add `AWSLambdaVPCAccessExecutionRole` to execution role as described [here](https://bobbyhadz.com/blog/aws-lambda-provided-execution-role-does-not-have-permissions).
-        * Add VPC.
-        * **[CONNECTION TO FUNCTION URL IS STILL NOT WORKING. SEEMS THE LAMBDA FUNCTION CAN'T CONNECT TO THE INTERNET. TO DO WITH VPCs AND NAT GATEWAYS. NEED TO FIGURE OUT.]**
-11. ETC. **[TO DO]**
+    * Navigate to IAM Roles and create a new role with the following properties:
+      * Trusted entity – AWS Lambda.
+      * Permissions – AWSLambdaBasicExecutionRole.
+      * Role name – lambda-url-role.
+9. Build curl command, it will look something like the following. Make sure to update with your own credentials and change the start/end time to be in the last 7 days. If you want to change the query, refer to this [documentation](https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query) for the syntax required. 
+```
+curl -X POST \
+    'https://<url-id>.lambda-url.<region>.on.aws' \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "query": "((ipad OR iphone) apple) -is:retweet",
+    "max_results": 100,
+    "start_time": "2022-08-22T13:00:00Z",
+    "end_time": "2022-08-22T13:30:00Z",
+    "bearer_token": "XXX",
+    "endpoint": "XXX",
+    "user": "dbadmin",
+    "region": "us-east-1a",
+    "dbname": "searchtweetsdb",
+    "password": "Test1230"
+}'
+```
+7. Run curl command.
 
 ## Notes
 This toolkit in intended as an example framework that quickly fetches, parses, and analyzes Twitter data.
@@ -81,3 +92,8 @@ The following data objects will not be persisted:
 * Places
 * Spaces
 * Lists
+
+## Note to self, useful resources (not to include in tutorial instructions)
+
+* Follow the guidlines here for creating the zip file referred to in Step 4: https://www.danielherediamejias.com/python-scripts-aws-lambda/
+* Create a function URL: https://docs.aws.amazon.com/lambda/latest/dg/urls-tutorial.html 
