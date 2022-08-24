@@ -49,16 +49,14 @@ Start by cloning this repository.
     *  In the Lambda handler: comment out lines 11-22 and uncomment lines 24-33 (as per comment in the script) and deploy. (Make sure to revert this back and redeploy to previous state when you're done testing.)
     * You can now test the Lambda function in the AWS console. When you test the function, new data will be added to your DB instance.
 
-**[The above works / has been tested. Review/ work on the following steps]**
-
-6. Create a function URL (this will later be used to trigger the lambda function and fetch Tweets):
+6. Create a function URL (this will be used to trigger the Lambda function and fetch Tweets):
     * From the Lambda function page: under "Configuration", select "Function URL".
     * Auth type, select "NONE".
     * Copy the function URL you just created for later. This will have the following format: `https://<url-id>.lambda-url.<region>.on.aws`.
     * Navigate to IAM Roles and create a new role with the following properties:
-      * Trusted entity – AWS Lambda.
-      * Permissions – AWSLambdaBasicExecutionRole.
-      * Role name – lambda-url-role.
+      * Trusted entity – AWS Lambda
+      * Permissions – AWSLambdaBasicExecutionRole
+      * Role name – lambda-url-role
 9. Build curl command, it will look something like the following. Make sure to update with your own credentials and change the start/end time to be in the last 7 days. If you want to change the query, refer to this [documentation](https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query) for the syntax required. 
 ```
 curl -X POST \
@@ -77,7 +75,8 @@ curl -X POST \
     "password": "Test1230"
 }'
 ```
-8. Run curl command.
+
+8. Run curl command to fetch Tweets that match your query and populate your database.
 
 ## Notes
 This toolkit in intended as an example framework that quickly fetches, parses, and analyzes Twitter data.
