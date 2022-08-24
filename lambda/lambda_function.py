@@ -333,3 +333,13 @@ def lambda_handler(event, context):
 
     request_count = put_tweets(query, max_results, start_time, end_time)
     print(f"Number of requests: {request_count}")
+    
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "body": json.dumps({
+            "request_count ": request_count
+        })
+    }
