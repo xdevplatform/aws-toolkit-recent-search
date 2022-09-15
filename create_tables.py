@@ -21,11 +21,11 @@ sql_context_annotations = "CREATE table context_annotations (tweet_id VARCHAR(50
 
 sql_entities_annotations = "CREATE table entities_annotations (tweet_id VARCHAR(50) NOT NULL, start INT, end INT, probability INT, type VARCHAR(20), normalized_text VARCHAR(50))"
 
-sql_entities_cashtags = "CREATE table entities_cashtags (tweet_id VARCHAR (50) NOT NULL, start INT, end INT, cashtag VARCHAR(50))"
+sql_entities_cashtags = "CREATE table entities_cashtags (tweet_id VARCHAR(50) NOT NULL, start INT, end INT, cashtag VARCHAR(50))"
 
-sql_entities_hashtags = "CREATE table entities_hashtags (tweet_id VARCHAR (50) NOT NULL, start INT, end INT, hashtag VARCHAR(50))"
+sql_entities_hashtags = "CREATE table entities_hashtags (tweet_id VARCHAR(50) NOT NULL, start INT, end INT, hashtag VARCHAR(50))"
 
-sql_entities_mentions = "CREATE table entities_mentions (tweet_id VARCHAR (50) NOT NULL, start INT, end INT, username VARCHAR(50), user_id VARCHAR(50))"
+sql_entities_mentions = "CREATE table entities_mentions (tweet_id VARCHAR(50) NOT NULL, start INT, end INT, username VARCHAR(50), user_id VARCHAR(50))"
 
 sql_entities_urls = "CREATE table entities_urls (tweet_id VARCHAR(50) NOT NULL, start INT, end INT, url VARCHAR(100), expanded_url VARCHAR(200), display_url VARCHAR(200), status VARCHAR(50), title VARCHAR(200), description VARCHAR(500), unwound_url VARCHAR(500))"
 

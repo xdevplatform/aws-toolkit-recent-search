@@ -71,10 +71,10 @@ def lambda_handler(event, context):
             print("Request count:", request_count)
             response_payload = response.json()
             meta = response_payload["meta"]
-            data = response_payload["data"]
-            users = response_payload["includes"]["users"]
             if meta["result_count"] == 0:
                 sys.exit("No results to analyze.")
+            data = response_payload["data"]
+            users = response_payload["includes"]["users"]
 
             # Send results to database
             connection = pymysql.connect(host=ENDPOINT, user=USER, passwd=PASSWORD, db=DBNAME)
@@ -147,8 +147,6 @@ def lambda_handler(event, context):
                         sql_annotations += f"({tweet_id}, {domain_id}, {domain_name}, {domain_description}, {entity_id}, {entity_name}), \n"
                     else:
                         pass
-                else:
-                    pass
 
                 if "referenced_tweets" in tweet: 
                     referenced_tweets = tweet["referenced_tweets"]
@@ -156,8 +154,6 @@ def lambda_handler(event, context):
                         referenced_tweet_type = connection.escape(ref_tweet["type"])
                         referenced_tweet_id = connection.escape(ref_tweet["id"])
                         sql_referenced_tweets += f"({tweet_id}, {referenced_tweet_type}, {referenced_tweet_id}), \n"
-                else:
-                    pass
 
                 if "entities" in tweet:
                     if "annotations" in tweet["entities"]:
@@ -168,8 +164,6 @@ def lambda_handler(event, context):
                             type = connection.escape(anno["type"])
                             normalized_text = connection.escape(anno["normalized_text"])
                             sql_entities += f"({tweet_id}, {start}, {end}, {probability}, {type}, {normalized_text}), \n"
-                    else:
-                        pass
 
                     if "cashtags" in tweet["entities"]:
                         for cashtg in tweet["entities"]["cashtags"]:
@@ -177,8 +171,6 @@ def lambda_handler(event, context):
                             end = connection.escape(cashtg["end"])
                             cashtag = connection.escape(cashtg["tag"])
                             sql_cashtags += f"({tweet_id}, {start}, {end}, {cashtag}), \n"
-                    else:
-                        pass
 
                     if "hashtags" in tweet["entities"]:
                         for hashtg in tweet["entities"]["hashtags"]:
@@ -186,8 +178,6 @@ def lambda_handler(event, context):
                             end = connection.escape(hashtg["end"])
                             hashtag = connection.escape(hashtg["tag"])
                             sql_hashtags += f"({tweet_id}, {start}, {end}, {hashtag}), \n"
-                    else:
-                        pass
 
                     if "mentions" in tweet["entities"]:
                         for ment in tweet["entities"]["mentions"]:
@@ -196,8 +186,6 @@ def lambda_handler(event, context):
                             username = connection.escape(ment["username"])
                             user_id = connection.escape(ment["id"])
                             sql_mentions += f"({tweet_id}, {start}, {end}, {username}, {user_id}), \n"
-                    else:
-                        pass
 
                     if "urls" in tweet["entities"]:
                         for u in tweet["entities"]["urls"]:
@@ -229,10 +217,6 @@ def lambda_handler(event, context):
                             except: 
                                 unwound_url = "NULL"
                             sql_urls += f"({tweet_id}, {start}, {end}, {url}, {expanded_url}, {display_url}, {status}, {title}, {description}, {unwound_url}), \n"
-                    else:
-                        pass
-                else: 
-                    pass 
 
             sql_tweets = sql_tweets[:-3] + ";"
 
