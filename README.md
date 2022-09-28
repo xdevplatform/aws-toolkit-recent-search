@@ -1,74 +1,130 @@
 # aws-toolkit-recent-search
 
-## Set up
+This toolkit provides a framework to ingest, process, and store Twitter data. The toolkit leverages Twitter's new [recent search API v2](https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent), allowing you to fetch Tweets from the last seven days that match a specific search query. 
 
-Start by cloning this repository.
+Follow the steps below to ingest Tweets into an AWS storage solution.
 
-1. Run CloudFormation script to create RDS database with MySQL engine.
-    * Login to your AWS account and navigate to AWS CloudFormation.
-    * Select "Create stack".
-    * Select "Template is ready" and "Upload a template file". Using "Choose file", upload `rds.yaml` (you can find this in the `cloudformation` directory of this GitHub repository).
-    * Select "Next".
-    * Enter a stack name, e.g. "rds". Other parameter values will be automatically populated from the CloudFormation template you just uploaded. Select "Next".
-    * No need to Configure stack options and Advanced options. Select "Next". 
-    * Scroll to the bottom of the page and select "Create stack".
-    * The database is now being created. This will take several minutes to complete.
-    * Once complete, make a note of the database endpoint. To find this: select the stack "rds" > "Resources" > click on the Physical ID "mysqldbtweets". Scroll down to the "Connect" section and you will find the endpoint there. This will look something like: mysqldbtweets.cv7ewtjysjfy.us-east-1.rds.amazonaws.com
+## What services does this toolkit leverage? 
 
-2. Rename `event_data_creds_example.json` to `event_data_creds.json` and add missing credentials, specifically: Twitter developer app bearer token and the database endpoint you saved in the previous step. Make sure to add `event_data_creds.json` to your `.gitignore` file to avoid sharing your credentials.
+* This toolkit requires a Twitter developer account and access to the Twitter API. The following two levels of access are free of charge:
 
-3. Navigate to your local command line. From the main `aws-toolkit-recent-search` directory, run the following script to create tables in the database: `$ python3 create_tables.py`
+  * Essential access gives you 500K Tweets/month
+  * Elevated access gives you 2M Tweets/month
 
-4. Upload ETL code to Lambda:
-    * Download `lambda/script.zip` locally from GitHub repo
-    * Log in to your AWS account and Search for Lambda in the "Search for services" search box.
-    * Navigate to AWS Lambda and select "Create function".
-    * Select "Author from scratch".
-    * Name the function "etl-recent-search".
-    * Under Runtime, select Python 3.9.
-    * Click on "Create Function".
-    * Select "Upload from" > ".zip file" and upload the `script.zip` file previously downloaded.
-    * Click "Save".
-    * Under "Configuration" > "General configuration": edit the Timeout to 15 minutes.
+* This toolkit leverages AWS Lambda and RDS. Pricing information for AWS services can be found [here](https://aws.amazon.com/pricing/).
 
-5. [Optional step] Test the Lambda function in the AWS Console: 
-    * Use the following test event (make sure to replace XXX with your own credentials and to update the start and end times to be within the last 7 days): 
-    ```
-    {
-        "query": "((ipad OR iphone) apple -is:retweet)",
-        "max_results": 100,
-        "start_time": "2022-08-21T13:00:00Z",
-        "end_time": "2022-08-21T13:30:00Z",
-        "bearer_token": "XXX",
-        "endpoint": "XXX",
-        "user": "dbadmin",
-        "dbname": "searchtweetsdb",
-        "password": "Test1230"
-    }
-    ```
-    *  In the Lambda handler: comment out lines 11-22 and uncomment lines 24-33 (as per comment in the script) and deploy. (Make sure to revert this back and redeploy to previous state when you're done testing.)
-    * You can now test the Lambda function in the AWS console. When you test the function, new data will be added to your DB instance.
+## Prerequisites
 
-6. Create a function URL (this will be used to trigger the Lambda function and fetch Tweets):
-    * From the Lambda function page: under "Configuration", select "Function URL".
-    * Auth type, select "NONE".
-    * Copy the function URL you just created for later. This will have the following format: `https://<url-id>.lambda-url.<region>.on.aws`.
-    * Navigate to IAM Roles and create a new role with the following properties:
-      * Trusted entity – AWS Lambda
-      * Permissions – AWSLambdaBasicExecutionRole
-      * Role name – lambda-url-role
-9. Build curl command, it will look something like the following. Make sure to update with your own credentials and change the start/end time to be in the last 7 days. If you want to change the query, refer to this [documentation](https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query) for the syntax required. 
-```
+1. A Twitter Developer account: [sign up here](https://developer.twitter.com/en/apply-for-access).
+2. A bearer token to authenticate your requests to the Twitter API: [refer to this documentation](https://developer.twitter.com/en/docs/authentication/oauth-2-0/bearer-tokens).
+3. An AWS account (the [free tier](http://aws.amazon.com/free) is sufficient): [create an account here](https://portal.aws.amazon.com/billing/signup#/start/email).
+
+## Implementation: step-by-step guide
+
+### Step 1: Create RDS MySQL database and associated tables
+
+1. Start by cloning this repository locally.
+
+2. Create an RDS MySQL database: 
+
+* Login to your AWS account and navigate to AWS CloudFormation.
+* Select "Create stack".
+* Select "Template is ready" and "Upload a template file". 
+* Using "Choose file", upload the file entitled rds.yaml (you can find this in the cloudformation directory of this GitHub repository, which you cloned locally).
+* Select "Next".
+* Enter a stack name, for example "rds". Other parameter values will be automatically populated from the CloudFormation template you just uploaded. Select "Next".
+* No need to Configure stack options and Advanced options. Select "Next".
+* Scroll to the bottom of the page and select "Create stack".
+* The database is now being created. This will take several minutes to complete.
+
+3. Once the process is complete, make a note of your database endpoint. To find this: 
+
+* Navigate to the "Stacks" section of CloudFormation. 
+* Select the stack you just created: "rds". 
+* Select "Resources", then click on the Physical ID "mysqldbtweets".This will take you to the RDS Management Console. 
+* Scroll down to the "Connect" section and you will find the endpoint there. This will look something like: `mysqldbtweets.xxxxxxxxxxxx.us-east-1.rds.amazonaws.com`
+
+4. Add a new inbound rule:
+
+* Navigate to Amazon RDS, select "DB Instances", and click into your database "mysqldbtweets". 
+* In the "Connectivity & security" tab, under "Security", click on the default VPC security group. 
+* Select the "Inbound rules" tab.
+* Click "Edit inbound rules" and "Add rule". Your new rule should have the following properties: 
+  * Type: All traffic 
+  * Source: IPv4 and 0.0.0.0/0
+
+5. Before you move onto the next step, be sure to check that your DB instance has a Status of "Available". You can check this by navigating to RDS > DB Instances. Note that, once created, it can take up to 20 minutes for your database instance to become available for network connections.
+
+6. You’re now ready to create tables in the database you just created:
+
+* Navigate to your local version of the GitHub repository. Rename `event_data_creds_example.json` to `event_data_creds.json`
+* On line 8, add the endpoint url for your database, the one you fetched in point 3 above. Make sure to add `event_data_creds.json` to your `.gitignore` file to avoid sharing your credentials.
+* Install PyMySQL. You can install it with pip in your local command line: `$ python3 -m pip install PyMySQL`
+* In your local command line, navigate to the main aws-toolkit-recent-search directory, and run the following script: `$ python3 create_tables.py`
+
+7. (Optional) You can download [DBeaver Lite](https://dbeaver.com/download/) to connect to your database and view the tables you created.
+
+### Step 2: Deploy the ETL code as an AWS Lambda function
+
+1. Locate lambda/script.zip in your local version of the GitHub repository.
+
+2. Back in your AWS account, navigate to AWS Lambda.
+
+3. Select "Create function".
+
+4. Select "Author from scratch".
+
+5. Name the function "etl-recent-search".
+
+6. Under Runtime, select Python 3.9.
+
+7. Click on "Create Function".
+
+8. Select "Upload from" > ".zip file" and upload the lambda/script.zip file.
+
+9. Click "Save".
+
+10. Under "Configuration" > "General configuration": edit the Timeout to 15 minutes.
+
+### Step 3: Create function URL to trigger the Lambda function
+
+1. Navigate to the AWS Lambda Functions page and select the "etl-recent-search" function you created in Step 2.
+
+2. Under "Configuration", select "Function URL" and create a new function URL.
+
+3. For auth type, select "NONE".
+
+4. Make a note of the function URL you just created. The URL format will be as follows: `https://<url-id>.lambda-url.<region>.on.aws`. This URL will be used in Step 4 to form a cURL command that can trigger the Lambda function to fetch Tweets and store them.
+
+5. Navigate to the AWS IAM Roles Console and create a new role with the following properties:
+
+* Trusted entity type – "AWS service"
+* Use case – Lambda
+* Permissions – AWSLambdaBasicExecutionRole
+* Role name – lambda-url-role
+
+### Step 4: Run cURL command to fetch and store Tweets of interest 
+
+1. Build the following cURL command. Make sure to add your own details and credentials where relevant, specifically: 
+
+* Replace `https://<url-id>.lambda-url.<region>.on.aws` with the function URL you generated in the above step.
+* The "query" line determines what Tweets will get returned. You can edit this query to fetch Tweets of interest to you. Twitter's [documentation](https://developer.twitter.com/en/docs/authentication/oauth-2-0/bearer-tokens) contains details on how to build a search query.
+* Edit the start and end times to be within the last 7 days (if your start and end times are older than the last 7 days, the query will fail).
+* Add your Twitter bearer token. Twitter's [documentation](https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query) explains how to generate and find your bearer token.
+* Next to "endpoint" add the database endpoint you generated in Step 1.3 above.
+* If required, edit the region to reflect the region in which you created your database.
+
+``` curl
 curl -X POST \
     'https://<url-id>.lambda-url.<region>.on.aws' \
     -H 'Content-Type: application/json' \
     -d '{
-    "query": "((ipad OR iphone) apple) -is:retweet",
+    "query": "((ipad OR iphone) apple) -is:retweet lang:en",
     "max_results": 100,
     "start_time": "2022-08-22T13:00:00Z",
     "end_time": "2022-08-22T13:30:00Z",
-    "bearer_token": "XXX",
-    "endpoint": "XXX",
+    "bearer_token": "XXXXX",
+    "endpoint": "XXXXX",
     "user": "dbadmin",
     "region": "us-east-1a",
     "dbname": "searchtweetsdb",
@@ -76,10 +132,13 @@ curl -X POST \
 }'
 ```
 
-8. Run curl command to fetch Tweets that match your query and populate your database.
+2. In your local command line run this cURL command. This will trigger the AWS Lambda function you deployed in Step 2, connect to the Twitter API to fetch Tweets of interest and store these in the database you created in Step 1.
 
+Please note: the cURL command might take a while to run if you are fetching large amounts of data. Anything that takes longer than 15 minutes will automatically timeout. If this happens, try reducing the time period between your "start_time" and "end_time". 
+
+If you run into any errors, you may want to check the logs to troubleshoot the cause of the issue. You can find these under "Lambda" > "Functions" > "etl-recent-search" > "Monitor" > "logs". There you’ll find a more verbose description of the error.
 ## Notes
-This toolkit in intended as an example framework that quickly fetches, parses, and analyzes Twitter data.
+This toolkit in intended as an example framework that quickly fetches, parses, and stores Twitter data.
 
 The following [data objects](https://developer.twitter.com/en/docs/twitter-api/data-dictionary/introduction) are extracted and persisted:
 
@@ -93,8 +152,3 @@ The following data objects will not be persisted:
 * Places
 * Spaces
 * Lists
-
-## Note to self, useful resources (not to include in tutorial instructions)
-
-* Follow the guidlines here for creating the zip file referred to in Step 4: https://www.danielherediamejias.com/python-scripts-aws-lambda/
-* Create a function URL: https://docs.aws.amazon.com/lambda/latest/dg/urls-tutorial.html 
