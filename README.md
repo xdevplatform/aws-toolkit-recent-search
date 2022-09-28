@@ -30,7 +30,7 @@ Follow the steps below to ingest Tweets into an AWS storage solution.
 * Login to your AWS account and navigate to AWS CloudFormation.
 * Select "Create stack".
 * Select "Template is ready" and "Upload a template file". 
-* Using "Choose file", upload the file entitled rds.yaml (you can find this in the cloudformation directory of this GitHub repository, which you cloned locally).
+* Using "Choose file", upload the file entitled `rds.yaml` (you can find this in the cloudformation directory of this GitHub repository, which you cloned locally).
 * Select "Next".
 * Enter a stack name, for example "rds". Other parameter values will be automatically populated from the CloudFormation template you just uploaded. Select "Next".
 * No need to Configure stack options and Advanced options. Select "Next".
@@ -58,7 +58,7 @@ Follow the steps below to ingest Tweets into an AWS storage solution.
 6. You’re now ready to create tables in the database you just created:
 
 * Navigate to your local version of the GitHub repository. Rename `event_data_creds_example.json` to `event_data_creds.json`
-* On line 8, add the endpoint url for your database, the one you fetched in point 3 above. Make sure to add `event_data_creds.json` to your `.gitignore` file to avoid sharing your credentials.
+* On line 3, add the endpoint url for your database, the one you fetched in point 3 above. Make sure to add `event_data_creds.json` to your `.gitignore` file to avoid sharing your credentials.
 * Install PyMySQL. You can install it with pip in your local command line: `$ python3 -m pip install PyMySQL`
 * In your local command line, navigate to the main aws-toolkit-recent-search directory, and run the following script: `$ python3 create_tables.py`
 
@@ -137,6 +137,8 @@ curl -X POST \
 Please note: the cURL command might take a while to run if you are fetching large amounts of data. Anything that takes longer than 15 minutes will automatically timeout. If this happens, try reducing the time period between your "start_time" and "end_time". 
 
 If you run into any errors, you may want to check the logs to troubleshoot the cause of the issue. You can find these under "Lambda" > "Functions" > "etl-recent-search" > "Monitor" > "logs". There you’ll find a more verbose description of the error.
+
+Connect to your database to view the stored data. You can use [DBeaver Lite](https://dbeaver.com/download/) to do this.
 ## Notes
 This toolkit in intended as an example framework that quickly fetches, parses, and stores Twitter data.
 
